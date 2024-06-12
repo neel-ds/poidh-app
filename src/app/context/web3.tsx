@@ -133,7 +133,8 @@ export const createSoloBounty: CreateBountyFunction = async (
       description,
       options
     );
-    await transaction.wait();
+    const receipt = await transaction.wait();
+    return receipt;
   } catch (error) {
     console.error('Error creating bounty:', error);
     throw error;
@@ -159,7 +160,8 @@ export const createOpenBounty: CreateBountyFunction = async (
       description,
       options
     );
-    await transaction.wait();
+    const receipt = await transaction.wait();
+    return receipt;
   } catch (error) {
     console.error('Error creating bounty:', error);
     throw error;
