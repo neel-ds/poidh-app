@@ -3,12 +3,23 @@ import { Switch } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-
 import ButtonCTA from '@/components/ui/ButtonCTA';
-
 import chainStatusStore from '@/store/chainStatus.store';
-
 import { createOpenBounty, createSoloBounty } from '@/app/context/web3';
+import { connectToDatabase } from '@/database/';
+import Bounty from '@/database/models/bounty.model';
+
+async function addToMongodb(bountyObject: any): Promise<void> {
+  try {
+    await connectToDatabase();
+
+    bountyObject.amount = String(bountyObject.amount);
+    bountyObject.createdAt = String(bountyObject.createdAt);
+    const bountyData = await Bounty.create(bountyObject);
+  } catch (error) {
+    console.error('Error creating bounty model:', error);
+  }
+}
 
 const Form = () => {
   const { primaryWallet } = useDynamicContext();
@@ -38,7 +49,13 @@ const Form = () => {
       } else {
         tx = await createOpenBounty(primaryWallet, name, description, amount);
       }
+
+      console.log('tx data: ', tx.logs[0].args);
+
+      await addToMongodb(tx.logs[0].args);
+
       toast.success('Bounty created successfully!');
+
       setName('');
       setDescription('');
       setAmount('');
